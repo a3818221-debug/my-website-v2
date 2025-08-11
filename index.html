@@ -1,270 +1,115 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Premium Animated Site</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B-town Cutz Salon</title>
 <style>
-  :root{
-    --bg-1:#071020; --bg-2:#062a3a;
-    --accent-a:#00d4ff; --accent-b:#7b61ff;
-    --card: rgba(255,255,255,0.04);
-    --glass: rgba(255,255,255,0.06);
-    --muted: rgba(230,238,248,0.75);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    color:#e9f6ff;
-    background:
-      radial-gradient(700px 400px at 10% 10%, rgba(123,97,255,0.09), transparent),
-      radial-gradient(600px 350px at 90% 80%, rgba(0,212,255,0.06), transparent),
-      linear-gradient(180deg,var(--bg-1),var(--bg-2));
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    overflow-x:hidden;
-  }
-
-  /* floating decorative blobs */
-  .blob{position:fixed;border-radius:50%;filter:blur(40px);opacity:.65;z-index:0;pointer-events:none}
-  .b1{width:420px;height:420px;left:-80px;top:-60px;background:linear-gradient(135deg,var(--accent-b),var(--accent-a));animation:float1 8s ease-in-out infinite}
-  .b2{width:320px;height:320px;right:-60px;bottom:-80px;background:linear-gradient(135deg,var(--accent-a),#46b3ff);animation:float2 10s ease-in-out infinite}
-  @keyframes float1{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(22px) rotate(6deg)}100%{transform:translateY(0) rotate(0)}}
-  @keyframes float2{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-28px) rotate(-6deg)}100%{transform:translateY(0) rotate(0)}}
-
-  /* container */
-  .wrap{max-width:1100px;margin:0 auto;padding:28px;position:relative;z-index:2}
-
-  /* NAV */
-  nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0}
-  .brand{display:flex;align-items:center;gap:12px;font-weight:700}
-  .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent-a),var(--accent-b));display:grid;place-items:center;box-shadow:0 10px 30px rgba(10,10,30,0.6)}
-  .logo svg{filter:drop-shadow(0 6px 14px rgba(0,0,0,0.35))}
-  .links{display:flex;gap:18px;align-items:center}
-  .links a{color:inherit;text-decoration:none;opacity:.95;padding:8px 10px;border-radius:8px;transition:all .22s}
-  .links a:hover{transform:translateY(-4px);background:var(--glass)}
-  .cta{background:linear-gradient(90deg,var(--accent-a),var(--accent-b));color:#041029;padding:9px 14px;border-radius:10px;font-weight:700;border:none;cursor:pointer;box-shadow:0 8px 26px rgba(11,12,30,0.45)}
-  .menu-toggle{display:none}
-
-  /* HERO */
-  .hero{display:grid;grid-template-columns:1fr;gap:18px;padding:48px 0;align-items:center}
-  .hero-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); border-radius:16px; padding:28px; box-shadow:0 14px 50px rgba(5,10,20,0.6);backdrop-filter: blur(6px)}
-  h1{font-size:2.4rem;margin:0 0 8px;line-height:1.05}
-  .lead{color:var(--muted);margin:0 0 18px;font-size:1.05rem}
-  .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
-
-  /* cards */
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:20px}
-  .card{background:var(--card);padding:18px;border-radius:12px;transition:transform .28s, box-shadow .28s;box-shadow:inset 0 1px rgba(255,255,255,0.02)}
-  .card:hover{transform:translateY(-8px);box-shadow:0 30px 70px rgba(8,10,20,0.6)}
-  .card h3{margin:10px 0 6px}
-  .muted{color:var(--muted)}
-
-  /* about/contact */
-  .two{display:grid;grid-template-columns:1fr 380px;gap:20px;margin-top:28px}
-  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); padding:18px;border-radius:12px}
-  label{display:block;margin:10px 0 6px;font-size:.9rem;color:var(--muted)}
-  input,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
-  textarea{min-height:120px;resize:vertical}
-
-  footer{padding:28px 0;text-align:center;color:var(--muted);margin-top:40px}
-
-  /* simple reveal on scroll classes */
-  .reveal{opacity:0;transform:translateY(12px);transition:all .6s cubic-bezier(.2,.9,.3,1)}
-  .reveal.show{opacity:1;transform:none}
-
-  /* responsive */
-  @media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
-  @media (max-width:680px){
-    .grid{grid-template-columns:1fr}
-    .two{grid-template-columns:1fr}
-    .links{display:none}
-    .menu-toggle{display:inline-flex;padding:8px;border-radius:10px;background:var(--glass);cursor:pointer}
-  }
-
-  /* small helper */
-  .center{display:flex;align-items:center;justify-content:center}
-  .icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));display:grid;place-items:center;font-weight:700}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Poppins', sans-serif;
+        color: white;
+        background: linear-gradient(-45deg, #ff4b2b, #ff416c, #ff758c, #ffcc70);
+        background-size: 400% 400%;
+        animation: gradientBG 10s ease infinite;
+        text-align: center;
+    }
+    @keyframes gradientBG {
+        0% {background-position: 0% 50%;}
+        50% {background-position: 100% 50%;}
+        100% {background-position: 0% 50%;}
+    }
+    header {
+        padding: 60px 20px;
+        animation: fadeDown 1.5s ease;
+    }
+    @keyframes fadeDown {
+        from {opacity: 0; transform: translateY(-50px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+    header h1 {
+        font-size: 50px;
+        margin-bottom: 10px;
+    }
+    header p {
+        font-size: 18px;
+        opacity: 0.9;
+    }
+    section {
+        padding: 40px 20px;
+        animation: fadeUp 2s ease;
+    }
+    @keyframes fadeUp {
+        from {opacity: 0; transform: translateY(50px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+    h2 {
+        margin-bottom: 20px;
+        font-size: 28px;
+        text-transform: uppercase;
+    }
+    ul {
+        list-style: none;
+        font-size: 18px;
+    }
+    ul li {
+        margin: 8px 0;
+    }
+    .btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 25px;
+        background: white;
+        color: #ff416c;
+        border-radius: 30px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    .btn:hover {
+        background: #ffcc70;
+        color: #fff;
+    }
+    footer {
+        background: rgba(0,0,0,0.3);
+        padding: 15px;
+        margin-top: 20px;
+    }
 </style>
 </head>
 <body>
-  <!-- decorative blobs -->
-  <div class="blob b1" aria-hidden></div>
-  <div class="blob b2" aria-hidden></div>
 
-  <div class="wrap">
-    <nav>
-      <div class="brand">
-        <div class="logo" aria-hidden>
-          <!-- small SVG mark -->
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 12h18" stroke="white" stroke-width="1.6" stroke-linecap="round"/><path d="M12 3v18" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity=".9"/></svg>
-        </div>
-        <div>
-          My Premium
-          <div style="font-size:.8rem;color:var(--muted);margin-top:2px">Fast • Responsive • Animated</div>
-        </div>
-      </div>
+<header>
+    <h1>💇‍♀️ B-town Cutz Salon 💇‍♂️</h1>
+    <p>Where Style Meets Perfection - Punjabi Mohali</p>
+</header>
 
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="links" role="navigation" aria-label="Main">
-          <a href="#home">Home</a>
-          <a href="#about">About</a>
-          <a href="#services">Services</a>
-          <a href="#contact">Contact</a>
-        </div>
+<section>
+    <h2>Our Services</h2>
+    <ul>
+        <li>✂ Haircuts & Styling</li>
+        <li>🎨 Hair Coloring</li>
+        <li>💆 Facials & Skin Care</li>
+        <li>💅 Manicure & Pedicure</li>
+        <li>👰 Bridal & Groom Packages</li>
+    </ul>
+    <a class="btn" href="tel:+911234567890">📞 Book Now</a>
+</section>
 
-        <button class="cta" onclick="document.location='#contact'">Get Started</button>
-        <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-      </div>
-    </nav>
+<section>
+    <h2>Contact Us</h2>
+    <p>📍 Punjabi Mohali</p>
+    <p>📞 +91 12345 67890</p>
+    <p>📧 btowncutz@email.com</p>
+</section>
 
-    <!-- HERO -->
-    <section id="home" class="hero" aria-label="Hero">
-      <div class="hero-card reveal" id="heroCard">
-        <h1>Beautiful, fast & modern web experiences</h1>
-        <p class="lead">Single-file, no-build template — easy to customize. Smooth animations, responsive layout and lightweight performance.</p>
+<footer>
+    <p>© 2025 B-town Cutz Salon | All Rights Reserved</p>
+</footer>
 
-        <div class="hero-actions">
-          <button class="cta" onclick="scrollToContact()">Talk to me</button>
-          <button class="panel" onclick="showDemo()" aria-label="View demo">Preview demo</button>
-        </div>
-
-        <div class="grid" style="margin-top:20px">
-          <div class="card reveal">
-            <div style="display:flex;gap:10px;align-items:center">
-              <div class="icon">⚡</div>
-              <div>
-                <h3>Performance</h3>
-                <div class="muted">Optimized for speed and minimal dependencies.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card reveal">
-            <div style="display:flex;gap:10px;align-items:center">
-              <div class="icon">📱</div>
-              <div>
-                <h3>Responsive</h3>
-                <div class="muted">Looks great on phones, tablets and desktop.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card reveal">
-            <div style="display:flex;gap:10px;align-items:center">
-              <div class="icon">🔒</div>
-              <div>
-                <h3>Static & Secure</h3>
-                <div class="muted">Static hosting reduces server attack surface.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ABOUT + CONTACT -->
-    <section id="about" class="two" aria-label="About & Contact">
-      <div class="panel reveal">
-        <h2 style="margin-top:0">About this template</h2>
-        <p class="muted">This is a compact premium template built as a single HTML file — ideal for GitHub Pages. Customize colors, text and sections easily.</p>
-
-        <div style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap">
-          <div style="flex:1;min-width:160px" class="card reveal">
-            <strong>Modern UI</strong>
-            <div class="muted" style="margin-top:8px">Polished visuals with soft shadows and glass panels.</div>
-          </div>
-
-          <div style="flex:1;min-width:160px" class="card reveal">
-            <strong>SEO-friendly</strong>
-            <div class="muted" style="margin-top:8px">Semantic markup and responsive meta tag included.</div>
-          </div>
-
-          <div style="flex:1;min-width:160px" class="card reveal">
-            <strong>Easy deploy</strong>
-            <div class="muted" style="margin-top:8px">Just upload `index.html` to GitHub Pages — you're live.</div>
-          </div>
-        </div>
-      </div>
-
-      <aside id="contact" class="panel reveal">
-        <h3 style="margin-top:0">Contact</h3>
-        <p class="muted">GitHub Pages is static — use mailto or a third-party form service. Replace `your-email@example.com` below.</p>
-
-        <label for="name">Name</label>
-        <input id="name" placeholder="Your name" />
-
-        <label for="email">Email</label>
-        <input id="email" type="email" placeholder="you@example.com" />
-
-        <label for="msg">Message</label>
-        <textarea id="msg" placeholder="Tell me about your project..."></textarea>
-
-        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
-          <button class="cta" onclick="sendMail()">Send email</button>
-          <button class="panel" onclick="copyEmail()">Copy email</button>
-        </div>
-
-        <div style="margin-top:14px;color:var(--muted);font-size:.95rem">
-          Or follow:
-          <div style="display:flex;gap:10px;margin-top:8px">
-            <a href="#" style="color:inherit;text-decoration:none">Twitter</a> •
-            <a href="#" style="color:inherit;text-decoration:none">GitHub</a> •
-            <a href="#" style="color:inherit;text-decoration:none">LinkedIn</a>
-          </div>
-        </div>
-      </aside>
-    </section>
-
-    <footer class="reveal">
-      <div style="opacity:.9">© <span id="yr"></span> • My Premium Site — Hosted on GitHub Pages</div>
-    </footer>
-  </div>
-
-<script>
-  // helpers
-  document.getElementById('yr').textContent = new Date().getFullYear();
-
-  function scrollToContact(){ location.hash = '#contact'; }
-  function showDemo(){ alert('Demo: replace content & links with your own.'); }
-
-  function sendMail(){
-    const name = document.getElementById('name').value || 'No name';
-    const email = document.getElementById('email').value || 'no-reply@example.com';
-    const msg = document.getElementById('msg').value || 'Hello!';
-    const subject = encodeURIComponent('Contact from website');
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${msg}`);
-    window.location.href = `mailto:your-email@example.com?subject=${subject}&body=${body}`;
-  }
-
-  function copyEmail(){
-    const text = 'your-email@example.com';
-    navigator.clipboard?.writeText(text).then(()=> alert('Email copied'), ()=> alert('Copy failed'));
-  }
-
-  // menu toggle for small screens
-  function toggleMenu(){
-    const l = document.querySelector('.links');
-    if(!l) return;
-    l.style.display = (l.style.display === 'flex') ? 'none' : 'flex';
-    if(l.style.display === 'flex'){ l.style.flexDirection='column'; l.style.position='absolute'; l.style.right='24px'; l.style.top='64px'; l.style.background='var(--glass)'; l.style.padding='12px'; l.style.borderRadius='10px' }
-  }
-
-  // reveal on scroll (simple)
-  const reveals = document.querySelectorAll('.reveal');
-  const rObserver = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting) e.target.classList.add('show');
-    });
-  }, {threshold:0.15});
-  reveals.forEach(r=> rObserver.observe(r));
-
-  // small accessibility: focus style for keyboard
-  document.addEventListener('keydown', (e)=>{
-    if(e.key === 'Tab') document.body.classList.add('user-tabbed');
-  });
-</script>
 </body>
 </html>
