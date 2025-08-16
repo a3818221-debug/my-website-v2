@@ -1,0 +1,216 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Play Chess vs Computer — Canvas + chess.js + Stockfish</title>
+  <!-- Single-file page you can paste as index.html and run on GitHub Pages. -->
+  <style>
+    :root{ --bg:#0b1020; --ink:#e9edff; --muted:#a6b1c9; --accent:#7aa2ff; --panel:#0f162b; }
+    *{box-sizing:border-box}
+    body{margin:0; background:radial-gradient(1000px 500px at 0% -10%, #153 0%, transparent 40%),
+                         radial-gradient(1200px 600px at 110% 110%, #357 0%, transparent 40%), var(--bg);
+         font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; color:var(--ink);
+         min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:18px}
+    .app{ width:min(1200px,96vw); display:grid; grid-template-columns: 1fr 380px; gap:16px; align-items:start }
+    @media (max-width: 980px){ .app{ grid-template-columns: 1fr } }
+    .card{ background:linear-gradient(180deg, #141b33, #0f1527); border:1px solid #1b2548; border-radius:18px; padding:14px; box-shadow: 0 20px 60px #0008 }
+    h1{ margin:4px 6px 10px; font-size: clamp(18px, 2.2vw, 28px)}
+    .board-wrap{ aspect-ratio:1/1; position:relative }
+    canvas{ width:100%; height:100%; display:block; border-radius:16px; border:1px solid #24335e; background:#0b122a }
+    .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center }
+    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px }
+    button, select{
+      appearance:none; border:1px solid #2b3d76; background:linear-gradient(180deg,#1b2a55,#142043);
+      color:var(--ink); padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; letter-spacing:.2px;
+      box-shadow:inset 0 0 0 1px #4c64c233, 0 8px 20px #0007; transition: transform .06s ease, filter .15s ease;
+    }
+    button:hover{ filter:brightness(1.08) } button:active{ transform:scale(.98) }
+    .ghost{ background:transparent; border-color:#23315f; color:var(--muted) }
+    label{ font-size:12px; color:var(--muted) }
+    .inp{ width:100%; background:#0e1530; border:1px solid #283768; color:#e8edff; border-radius:10px; padding:10px; font-family: ui-monospace, Menlo, Consolas, monospace }
+    .moves{ height:170px; overflow:auto; background:#0b1330; border:1px solid #24335e; border-radius:12px; padding:8px; font: 13px/1.5 ui-monospace, Menlo, Consolas }
+    .moves b{ color:#b9c7ff }
+    .badge{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; border:1px solid #2a3c7a; background:#111a38}
+    .dot{width:10px; height:10px; border-radius:999px; background:var(--accent); box-shadow:0 0 10px var(--accent)}
+    .hint{ font-size:12px; color:#92a0c5 }
+  </style>
+  <!-- chess.js (rules) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js" integrity="sha512-0t9sU6F6c0AuANqT9mRIt+3m0j9x1gLu8oJ4sH6b//kHTpN9qVDRzY8bqQF5p0q0hIE2C8Dq9Ff8S1z1mC4O8w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <!-- Stockfish WASM (engine) → works on GitHub Pages -->
+  <script src="https://unpkg.com/stockfish/stockfish.wasm.js"></script>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <h1>Play Chess vs Computer</h1>
+      <div class="board-wrap"><canvas id="board" width="800" height="800"></canvas></div>
+      <div class="row" style="margin-top:10px">
+        <span class="badge"><span class="dot"></span> <span id="status">Ready</span></span>
+        <button id="flip" class="ghost">Flip</button>
+        <button id="new" class="ghost">New Game</button>
+        <button id="undo" class="ghost">Undo</button>
+      </div>
+    </div><div class="card">
+  <div class="grid">
+    <label>Play as
+      <select id="side" class="inp">
+        <option value="w" selected>White</option>
+        <option value="b">Black</option>
+      </select>
+    </label>
+    <label>Engine level
+      <select id="level" class="inp">
+        <option>1</option><option>2</option><option>3</option><option selected>4</option>
+        <option>5</option><option>6</option><option>7</option><option>8</option>
+        <option>9</option><option>10</option><option>11</option><option>12</option>
+        <option>13</option><option>14</option><option>15</option><option>16</option>
+        <option>17</option><option>18</option><option>19</option><option>20</option>
+      </select>
+    </label>
+  </div>
+  <div class="grid">
+    <label>Move time (ms)
+      <select id="movetime" class="inp">
+        <option>300</option><option selected>700</option><option>1000</option><option>1500</option><option>3000</option>
+      </select>
+    </label>
+    <label>Evaluation <div id="eval" class="inp" style="height:42px; display:flex; align-items:center">-</div></label>
+  </div>
+  <label>FEN <textarea id="fen" rows="2" class="inp"></textarea></label>
+  <div class="grid">
+    <button id="loadFen">Load FEN</button>
+    <button id="copyFen" class="ghost">Copy FEN</button>
+  </div>
+  <div class="moves" id="moves"></div>
+  <p class="hint">Drag a piece to a highlighted square. Legal moves only. Space = engine move, F = flip. When you play Black, the engine starts.</p>
+</div>
+
+  </div>  <script>
+    // ===== Game rules (chess.js) =====
+    const game = new Chess();
+
+    // ===== Engine (Stockfish) =====
+    const sf = STOCKFISH(); // creates a dedicated engine thread
+    let engineReady = false;
+    let bestMovePending = false;
+    let pvEval = '-';
+
+    sf.onmessage = (e)=>{
+      const line = (''+e.data).trim();
+      // console.log('SF:', line)
+      if(line === 'uciok') send('isready');
+      else if(line === 'readyok') { engineReady = true; status('Engine ready'); syncEngineOptions(); maybeEngineToMove(); }
+      else if(line.startsWith('info ')) parseInfo(line);
+      else if(line.startsWith('bestmove')) handleBestMove(line);
+    };
+    function send(cmd){ sf.postMessage(cmd); }
+    // Init UCI
+    send('uci');
+
+    function syncEngineOptions(){
+      send('ucinewgame');
+      const lvl = +level.value;
+      send(`setoption name Skill Level value ${lvl}`);
+      // make engine weaker if low level
+      const eloByLevel = Math.min(350 + lvl*75, 2850);
+      send(`setoption name UCI_LimitStrength value ${lvl<10? 'true':'false'}`);
+      send(`setoption name UCI_Elo value ${eloByLevel}`);
+    }
+
+    function engineThink(){
+      if(bestMovePending || !engineReady) return;
+      bestMovePending = true; pvEval='-'; updateEval();
+      const fen = game.fen();
+      send(`position fen ${fen}`);
+      send(`go movetime ${+movetime.value}`);
+      status('Engine thinking...');
+    }
+
+    function parseInfo(s){
+      // Example: info depth 12 score cp 34 pv e2e4 e7e5 ...
+      const m = s.match(/score (cp|mate) (-?\d+)/);
+      if(!m) return;
+      if(m[1]==='cp') { pvEval = (parseInt(m[2],10)/100).toFixed(2); }
+      else { pvEval = `#${m[2]}`; }
+      updateEval();
+    }
+    function handleBestMove(s){
+      bestMovePending = false;
+      const m = s.split(' ');
+      const uci = m[1]; if(!uci || uci==='(none)'){ status('Draw / no move'); return; }
+      const move = { from: uci.slice(0,2), to: uci.slice(2,4), promotion: uci.slice(4,5) || 'q' };
+      const mv = game.move(move);
+      if(mv){ lastMove = { from: mv.from, to: mv.to }; pushHistory(mv); updateSideUI(); animateMove(algToRC(mv.from), algToRC(mv.to), ()=>{ draw(); status('Your turn'); }); }
+    }
+
+    // ===== Canvas board =====
+    const canvas = document.getElementById('board');
+    const ctx = canvas.getContext('2d');
+    const S=100, light='#e9edf7', dark='#7e8ab3', hlFrom='#ffd84c99', hlTo='#3bf1c388', hlMove='#33d1ff44';
+    const PIECES={K:'♔',Q:'♕',R:'♖',B:'♗',N:'♘',P:'♙'};
+    let orientation='w', dragging=null, lastMove=null, highlights=[];
+
+    function rcToAlg({r,c}){ return 'abcdefgh'[c] + (8-r); }
+    function algToRC(s){ return { r: 8-parseInt(s[1],10), c: 'abcdefgh'.indexOf(s[0]) }; }
+    function toScreenRC({r,c}){ if(orientation==='b'){ r=7-r; c=7-c; } return {x:c*S, y:r*S}; }
+    function boardSquareAt(x,y){ const rect=canvas.getBoundingClientRect(); let c=Math.floor((x-rect.left)/rect.width*8); let r=Math.floor((y-rect.top)/rect.height*8); if(orientation==='b'){ c=7-c; r=7-r; } return {r,c}; }
+
+    function draw(){
+      // squares
+      for(let r=0;r<8;r++) for(let c=0;c<8;c++){ ctx.fillStyle=((r+c)%2===0)?light:dark; roundRect(ctx,c*S,r*S,S,S,14); ctx.fill(); }
+      // last move
+      if(lastMove){ ctx.fillStyle=hlMove; const a=toScreenRC(algToRC(lastMove.from)), b=toScreenRC(algToRC(lastMove.to)); roundRect(ctx,a.x,a.y,S,S,14); ctx.fill(); roundRect(ctx,b.x,b.y,S,S,14); ctx.fill(); }
+      // legal targets
+      for(const h of highlights){ const p=toScreenRC(h); ctx.fillStyle=hlTo; roundRect(ctx,p.x,p.y,S,S,14); ctx.fill(); }
+      // coords
+      ctx.fillStyle='#0b122a'; ctx.font='14px ui-monospace, Menlo, Consolas';
+      for(let i=0;i<8;i++){ ctx.fillText('abcdefgh'[orientation==='w'?i:7-i], 8+i*S, 14); ctx.fillText(String(orientation==='w'?8-i:i+1), 8, 18+i*S); }
+      // pieces
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.font='64px system-ui, Segoe UI Symbol, Noto Color Emoji, serif';
+      const b=game.board();
+      for(let r=0;r<8;r++) for(let c=0;c<8;c++){ const p=b[r][c]; if(!p) continue; if(dragging && dragging.from.r===r && dragging.from.c===c) continue; const {x,y}=toScreenRC({r,c}); ctx.fillStyle=(p.color==='w')?'#fff':'#1a2540'; ctx.shadowColor='#0008'; ctx.shadowBlur=14; ctx.fillText(PIECES[p.type.toUpperCase()], x+S/2, y+S/2+2); ctx.shadowBlur=0; }
+      // dragging
+      if(dragging){ const {x,y}=dragging.mouse; const p=dragging.piece; ctx.fillStyle=(p.color==='w')?'#fff':'#1a2540'; ctx.shadowColor='#000c'; ctx.shadowBlur=22; ctx.fillText(PIECES[p.type.toUpperCase()], x, y); ctx.shadowBlur=0; }
+    }
+    function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+    // Drag & drop
+    canvas.addEventListener('pointerdown', e=>{ const sq=boardSquareAt(e.clientX,e.clientY); const piece=game.board()[sq.r][sq.c]; if(!piece) return; if(piece.color!==game.turn()) return; if((side.value==='w'&&piece.color!=='w')||(side.value==='b'&&piece.color!=='b')) return; dragging={piece,from:sq,mouse:toCanvasPoint(e)}; const moves=game.moves({square:rcToAlg(sq),verbose:true}); highlights=moves.map(m=>algToRC(m.to)); draw(); });
+    canvas.addEventListener('pointermove', e=>{ if(!dragging) return; dragging.mouse=toCanvasPoint(e); draw(); });
+    canvas.addEventListener('pointerup', e=>{ if(!dragging) return; const target=boardSquareAt(e.clientX,e.clientY); const from=rcToAlg(dragging.from), to=rcToAlg(target); const mv=game.move({from,to,promotion:'q'}); highlights=[]; if(mv){ lastMove={from:mv.from,to:mv.to}; pushHistory(mv); animateMove(algToRC(mv.from),algToRC(mv.to),()=>{ draw(); updateSideUI(); maybeEngineToMove(); }); } dragging=null; draw(); });
+    function toCanvasPoint(e){ const rect=canvas.getBoundingClientRect(); const x=(e.clientX-rect.left)/rect.width*canvas.width; const y=(e.clientY-rect.top)/rect.height*canvas.height; return {x,y}; }
+
+    // Animate
+    let anim=null; function animateMove(from,to,done){ anim={from,to,t:0,dur:500}; const piece=game.board()[to.r][to.c]; const start=performance.now(); requestAnimationFrame(function step(ts){ anim.t=Math.min(1,(ts-start)/anim.dur); draw(); const a=toScreenRC(from), b=toScreenRC(to); const x=lerp(a.x,b.x,ease(anim.t))+S/2; const y=lerp(a.y,b.y,ease(anim.t))+S/2+2; ctx.fillStyle=(piece.color==='w')?'#fff':'#1a2540'; ctx.shadowColor='#000a'; ctx.shadowBlur=16; ctx.fillText(PIECES[piece.type.toUpperCase()],x,y); ctx.shadowBlur=0; if(anim.t<1) requestAnimationFrame(step); else { anim=null; done&&done(); } }); }
+    function lerp(a,b,t){ return a+(b-a)*t } function ease(t){ return 1-Math.pow(1-t,3); }
+
+    // Side UI
+    const statusEl=document.getElementById('status'); const movesEl=document.getElementById('moves'); const fenEl=document.getElementById('fen'); const side=document.getElementById('side'); const level=document.getElementById('level'); const movetime=document.getElementById('movetime'); const evalEl=document.getElementById('eval');
+    document.getElementById('flip').onclick=()=>{ orientation=(orientation==='w'?'b':'w'); draw(); };
+    document.getElementById('new').onclick=()=>{ game.reset(); lastMove=null; history=[]; redo=[]; updateSideUI(); draw(); syncEngineOptions(); maybeEngineToMove(true); };
+    document.getElementById('undo').onclick=()=>{ const m=game.undo(); if(m){ lastMove=null; updateSideUI(); draw(); } };
+    document.getElementById('loadFen').onclick=()=>{ try{ game.load(fenEl.value.trim()); lastMove=null; history=[]; redo=[]; updateSideUI(); draw(); maybeEngineToMove(true);}catch(e){ status('Bad FEN'); } };
+    document.getElementById('copyFen').onclick=()=>{ navigator.clipboard.writeText(game.fen()); status('FEN copied'); };
+
+    side.onchange=()=>{ maybeEngineToMove(true); };
+    level.onchange=syncEngineOptions; movetime.onchange=()=>{};
+
+    let history=[]; let redo=[];
+    function pushHistory(m){ history.push(m); }
+    function updateSideUI(){ fenEl.value=game.fen(); const san=game.history(); let html=''; for(let i=0;i<san.length;i+=2){ const n=1+i/2; html += `<b>${n}.</b> ${san[i]||''} ${san[i+1]||''}<br>`; } movesEl.innerHTML = html || '<em>No moves yet</em>'; status(game.in_checkmate()? 'Checkmate' : game.in_draw()? 'Draw' : (game.turn()==='w'?'White':'Black')+' to move'); updateEval(); }
+    function status(t){ statusEl.textContent=t; }
+    function updateEval(){ evalEl.textContent = pvEval; }
+
+    function playerToMove(){ return game.turn()===side.value; }
+    function maybeEngineToMove(start=false){ if(game.game_over()) return; if(!engineReady) return; if(playerToMove()) { if(start) status('Your move'); return; } engineThink(); }
+
+    // First draw + start position
+    syncEngineOptions(); updateSideUI(); draw();
+
+    // If you pick to play Black, engine moves first
+    if(side.value==='b') maybeEngineToMove(true);
+
+    // Shortcuts
+    document.addEventListener('keydown', (e)=>{ if(e.code==='Space'){ e.preventDefault(); if(!playerToMove()) engineThink(); } if(e.key==='f'||e.key==='F') document.getElementById('flip').click(); });
+  </script></body>
+</html>
