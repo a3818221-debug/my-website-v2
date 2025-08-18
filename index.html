@@ -1,548 +1,121 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="hi">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>ShaheedCoin — Digital Tribute (Demo)</title>
-<meta name="description" content="ShaheedCoin — a premium tribute to Shaheed Bhagat Singh. Demo wallet, coins, notes, story & QR.">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>भगत सिंह HD करेंसी</title>
+    <style>
+        /* ग्लोबल स्टाइल */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: #000;
+            color: white;
+            min-height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: gold;
+            margin: 20px 0;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
 
-<style>
-  :root{
-    --bg-dark:#071126;
-    --panel:#0f141c;
-    --paper:#FFF8F2;
-    --gold:#FFD36E;
-    --gold-strong:#FFB64D;
-    --green:#0B6A47;
-    --pink:#FF4AB0;
-    --muted:#9aa6b6;
-    --glass:rgba(255,255,255,0.04);
-    --border:rgba(255,255,255,0.08);
-    --radius:18px;
-    --max:1200px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-    background: radial-gradient(800px 400px at 10% 0%, rgba(11,106,71,0.08), transparent 30%), 
-                linear-gradient(180deg,var(--bg-dark), #04101a 60%);
-    color: #e9eef7; -webkit-font-smoothing:antialiased;
-  }
-  a{color:inherit; text-decoration:none}
-  .container{max-width:var(--max); margin:0 auto; padding:0 18px}
+        /* कॉइन स्टाइल (HD 3D) */
+        .coin-container {
+            perspective: 1000px;
+            margin: 40px auto;
+            width: 250px;
+            height: 250px;
+        }
+        
+        .coin {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            transition: transform 0.8s;
+        }
+        
+        .front, .back {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: absolute;
+            backface-visibility: hidden;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
+        }
+        
+        .front {
+            background-image: url('bhagat-coin-front-hd.jpg'); /* यहाँ आपकी फोटो */
+        }
+        
+        .back {
+            background-image: url('bhagat-coin-back-hd.jpg'); /* यहाँ आपकी फोटो */
+            transform: rotateY(180deg);
+        }
 
-  /* NAV */
-  header.site-nav{
-    position:sticky; top:0; z-index:60; backdrop-filter:blur(8px);
-    background:linear-gradient(180deg, rgba(7,11,17,.75), rgba(7,11,17,.45));
-    border-bottom:1px solid var(--border);
-  }
-  .nav-row{display:flex;align-items:center;justify-content:space-between;gap:12px; padding:12px 0}
-  .brand{display:flex;align-items:center;gap:12px}
-  .logo{
-    width:56px;height:56px;border-radius:12px;display:grid;place-items:center;font-weight:800;
-    background:conic-gradient(from 180deg,var(--gold),var(--gold-strong),var(--pink)); color:#0a0a0a;
-    box-shadow:0 10px 26px rgba(0,0,0,.45);
-  }
-  .brand h1{font-family:Poppins,Inter; font-size:18px; margin:0}
-  .nav-links{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-  .nav-links a{padding:8px 12px;border-radius:10px;font-weight:600;color:var(--muted)}
-  .cta{background:linear-gradient(90deg,var(--gold),var(--gold-strong)); color:#071126; padding:9px 14px; border-radius:999px; font-weight:800}
-
-  /* HERO */
-  .hero{padding:56px 0 28px}
-  .hero-grid{display:grid; grid-template-columns:1fr 460px; gap:28px; align-items:center}
-  @media (max-width:980px){.hero-grid{grid-template-columns:1fr; padding:20px 0}}
-  .hero-left h2{font-family:Poppins; font-size:38px; margin:0 0 10px; line-height:1.02; color:var(--gold)}
-  .hero-left p{color:var(--muted); max-width:68ch; margin-bottom:18px}
-  .hero-ctas{display:flex; gap:12px; flex-wrap:wrap}
-  .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:var(--glass);border:1px solid var(--border);font-weight:700;color:var(--muted)}
-
-  /* coin preview */
-  .coin-preview{display:grid; place-items:center; gap:12px; padding:18px; border-radius:20px; background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); border:1px solid var(--border); box-shadow:0 30px 60px rgba(0,0,0,.45)}
-  .coin-large{width:220px;height:220px;border-radius:50%;display:grid;place-items:center;font-family:Poppins;font-weight:800;color:#071126;
-             background:radial-gradient(circle at 40% 30%, #fff7dd 0%, var(--gold) 25%, var(--gold-strong) 65%); box-shadow:0 20px 50px rgba(0,0,0,.5)}
-  .coin-edge{width:86%; height:86%; border-radius:50%; background:conic-gradient(from 160deg,#fff8e6,rgba(255,255,255,.05)); display:grid; align-items:center; justify-items:center; text-align:center; padding:8px}
-  .coin-label{font-size:28px; letter-spacing:1px}
-
-  /* demo gallery */
-  .section{padding:56px 0}
-  .section h3{font-family:Poppins; font-size:24px; color:var(--gold); margin-bottom:8px}
-  .notes-row{display:flex; gap:14px; flex-wrap:wrap; align-items:center}
-  .note-card{width:260px;height:130px;border-radius:12px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;
-             box-shadow:0 10px 30px rgba(0,0,0,.45); border:1px solid var(--border); background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));}
-  .note-denom{font-family:Poppins; font-weight:800; font-size:22px; color:var(--paper)}
-  .note-sub{color:var(--muted); font-size:13px}
-
-  /* Wallet Card */
-  .wallet{max-width:520px;margin:0 auto;border-radius:16px;padding:18px;background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); border:1px solid var(--border); box-shadow:var(--shadow)}
-  .wallet .bal{font-family:Poppins; font-size:34px; color:var(--gold); font-weight:800}
-  .wallet .meta{color:var(--muted); margin-bottom:8px}
-  .wallet-actions{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap}
-  input,textarea,select{background:transparent;border:1px solid var(--border); padding:10px 12px;border-radius:10px;color:var(--text); outline:none}
-  input:focus,textarea:focus{box-shadow:0 0 0 3px rgba(255,211,110,.06); border-color:rgba(255,211,110,.6)}
-
-  /* history */
-  .history{display:flex;flex-direction:column;gap:10px; max-height:320px; overflow:auto;padding-right:6px}
-  .tx{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,.01), rgba(255,255,255,.01)); border:1px solid var(--border)}
-
-  /* story */
-  .story-card{display:grid; grid-template-columns:1fr 320px; gap:20px; align-items:start}
-  @media (max-width:980px){ .story-card{grid-template-columns:1fr} }
-  .story-portrait{border-radius:12px;padding:16px;background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); border:1px solid var(--border); text-align:center}
-  .story-portrait svg{width:100%; height:auto; max-height:300px}
-  .timeline{display:flex;flex-direction:column;gap:14px}
-
-  /* footer */
-  footer{padding:30px 0; text-align:center; color:var(--muted); border-top:1px solid var(--border)}
-
-  /* small screens */
-  @media (max-width:680px){
-    .coin-large{width:160px;height:160px}
-    .note-card{width:100%}
-    .nav-row{padding:8px 0}
-  }
-
-  /* subtle reveals */
-  .reveal{opacity:0; transform:translateY(10px); transition:all .6s ease}
-  .reveal.visible{opacity:1; transform:none}
-</style>
+        /* नोट स्टाइल (HD) */
+        .note {
+            width: 320px;
+            height: 160px;
+            margin: 30px auto;
+            border-radius: 15px;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s;
+        }
+        
+        .note:hover {
+            transform: scale(1.05);
+        }
+        
+        #note10 {
+            background-image: url('bhagat-note-10-hd.jpg'); /* यहाँ आपकी फोटो */
+        }
+        
+        #note100 {
+            background-image: url('bhagat-note-100-hd.jpg'); /* यहाँ आपकी फोटो */
+        }
+    </style>
 </head>
 <body>
-
-<header class="site-nav">
-  <div class="container nav-row">
-    <div class="brand">
-      <div class="logo" aria-hidden="true">SC</div>
-      <div><h1>ShaheedCoin</h1><div style="font-size:12px;color:var(--muted)">Digital Tribute • Demo</div></div>
+    <h1>भगत सिंह HD डिजिटल करेंसी</h1>
+    
+    <!-- 3D कॉइन -->
+    <div class="coin-container">
+        <div class="coin" id="coin" onclick="flipCoin()">
+            <div class="front"></div>
+            <div class="back"></div>
+        </div>
+        <p>स्पर्श करके घुमाएँ</p>
     </div>
-
-    <nav class="nav-links">
-      <a href="#showcase">Showcase</a>
-      <a href="#wallet-section">Wallet</a>
-      <a href="#story">Story</a>
-      <a class="cta" id="openIssue">Issue</a>
-    </nav>
-  </div>
-</header>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="container hero-grid">
-    <div class="hero-left">
-      <div class="reveal" style="max-width:720px">
-        <h2>ShaheedCoin — A Digital Tribute</h2>
-        <p>Premium, respectful and unique digital note & coin designs inspired by the spirit of Shaheed Bhagat Singh. This demo shows wallet flows, QR receive, note/coin gallery and a short timeline.</p>
-
-        <div class="hero-ctas" style="margin-top:16px">
-          <div class="pill">Brand: <strong style="margin-left:6px">ShaheedCoin (SC)</strong></div>
-          <button class="cta" id="gotoWallet">Open Wallet</button>
-        </div>
-      </div>
-    </div>
-
-    <aside class="coin-preview reveal">
-      <div class="coin-large" aria-hidden="true">
-        <div class="coin-edge">
-          <!-- Inline stylized portrait + label -->
-          <svg viewBox="0 0 200 200" width="72" height="72" aria-hidden="true">
-            <defs>
-              <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#fff7dd"/><stop offset="1" stop-color="#ffd36e"/></linearGradient>
-            </defs>
-            <circle cx="100" cy="100" r="95" fill="url(#g1)"/>
-            <g transform="translate(100,100) scale(.9)">
-              <!-- stylized portrait: abstract, respectful -->
-              <path d="M-30 28 C -10 32, 10 30, 30 18 L 28 -10 C 5 -2, -5 -6, -30 -2 Z" fill="#081126" opacity="0.95"/>
-              <path d="M-24 -10 C -14 -32, 12 -36, 26 -14" stroke="#081126" stroke-width="4" fill="none" stroke-linecap="round"/>
-            </g>
-          </svg>
-          <div style="font-size:12px;margin-top:6px;color:#071126;font-weight:800" class="coin-label">ShaheedCoin</div>
-        </div>
-      </div>
-      <div style="text-align:center;color:var(--muted); font-size:13px">Hero Coin • 3D shimmer • Tribute Edition</div>
-    </aside>
-  </div>
-</section>
-
-<!-- SHOWCASE: notes + coins -->
-<section id="showcase" class="section">
-  <div class="container">
-    <h3>Currency Showcase</h3>
-    <p style="color:var(--muted); margin-bottom:14px">Unique note skins & coins — inspired by Indian denomination feel but fully original and respectful.</p>
-
-    <div class="notes-row reveal">
-      <!-- Note 50 -->
-      <div class="note-card" style="background:linear-gradient(120deg,#E3F9FF 0%, #B3E8FF 100%); color:#0b1430">
-        <div style="display:flex; justify-content:space-between; align-items:center">
-          <div>
-            <div class="note-denom">50 SC</div>
-            <div class="note-sub">Tribute Note • Inquilab</div>
-          </div>
-          <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
-            <circle cx="32" cy="32" r="30" fill="#fff8" />
-            <text x="32" y="38" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="18" fill="#0b1430">BS</text>
-          </svg>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center">
-          <small style="color:rgba(11,20,36,.6)">INSP: freedom • respect</small>
-          <small style="color:rgba(11,20,36,.6)">#NX50</small>
-        </div>
-      </div>
-
-      <!-- Note 100 -->
-      <div class="note-card" style="background:linear-gradient(120deg,#f7d6ff 0%, #f1a6ff 100%); color:#2b0633">
-        <div style="display:flex; justify-content:space-between; align-items:center">
-          <div>
-            <div class="note-denom">100 SC</div>
-            <div class="note-sub">Honor Note • Shaheed</div>
-          </div>
-          <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
-            <rect x="2" y="2" width="60" height="60" rx="8" fill="#fff8"/>
-            <text x="32" y="38" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="16" fill="#2b0633">S</text>
-          </svg>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center">
-          <small style="color:rgba(43,6,51,.6)">Quote: "Inquilab Zindabad"</small>
-          <small style="color:rgba(43,6,51,.6)">#NX100</small>
-        </div>
-      </div>
-
-      <!-- Note 200 -->
-      <div class="note-card" style="background:linear-gradient(120deg,#FFF3D9 0%, #FFD36E 100%); color:#2f2400">
-        <div style="display:flex; justify-content:space-between; align-items:center">
-          <div>
-            <div class="note-denom">200 SC</div>
-            <div class="note-sub">Valor Note</div>
-          </div>
-          <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
-            <circle cx="32" cy="32" r="28" fill="#fff8"/>
-            <text x="32" y="38" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="16" fill="#2f2400">★</text>
-          </svg>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center">
-          <small style="color:rgba(47,36,0,.6)">Design: Holographic stripe</small>
-          <small style="color:rgba(47,36,0,.6)">#NX200</small>
-        </div>
-      </div>
-
-      <!-- Note 500 -->
-      <div class="note-card" style="background:linear-gradient(120deg,#dfe9f3 0%, #b0c9e6 100%); color:#07233f">
-        <div style="display:flex; justify-content:space-between; align-items:center">
-          <div>
-            <div class="note-denom">500 SC</div>
-            <div class="note-sub">Premium Note</div>
-          </div>
-          <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
-            <rect x="2" y="2" width="60" height="60" rx="12" fill="#fff8"/>
-            <text x="32" y="38" text-anchor="middle" font-family="Poppins" font-weight="700" font-size="16" fill="#07233f">♛</text>
-          </svg>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center">
-          <small style="color:rgba(7,35,63,.6)">Limited • Tribute Edition</small>
-          <small style="color:rgba(7,35,63,.6)">#NX500</small>
-        </div>
-      </div>
-    </div>
-
-    <!-- coin set -->
-    <div style="margin-top:22px" class="reveal">
-      <h3 style="margin-bottom:12px">Coins (10 / 20 / Hero)</h3>
-      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center">
-        <div style="width:120px; text-align:center">
-          <div style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 30%,#fff7dd,#ffd36e 30%,#d99f3a 80%);display:grid;place-items:center;box-shadow:0 12px 30px rgba(0,0,0,.45);">
-            <div style="font-weight:900;color:#071126">10</div>
-          </div>
-          <div style="color:var(--muted);font-size:13px;margin-top:8px">10 SC</div>
-        </div>
-
-        <div style="width:120px; text-align:center">
-          <div style="width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 40% 30%,#fff7f6,#ffb3c9 30%,#ff4ab0 80%);display:grid;place-items:center;box-shadow:0 12px 30px rgba(0,0,0,.45);">
-            <div style="font-weight:900;color:#071126">20</div>
-          </div>
-          <div style="color:var(--muted);font-size:13px;margin-top:8px">20 SC</div>
-        </div>
-
-        <div style="width:200px; text-align:center">
-          <div style="width:200px;height:200px;border-radius:50%;background:radial-gradient(circle at 40% 30%,#fff7dd,#ffd36e 30%,#ffb64d 80%);display:grid;place-items:center;box-shadow:0 20px 50px rgba(0,0,0,.55);border:4px solid rgba(255,255,255,.12)">
-            <div style="font-weight:900;color:#071126;font-size:34px">SC</div>
-            <div style="font-size:12px;color:rgba(7,17,23,.7);margin-top:6px">ShaheedCoin</div>
-          </div>
-          <div style="color:var(--muted);font-size:13px;margin-top:10px">Hero Coin • Tribute</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- WALLET -->
-<section id="wallet-section" class="section">
-  <div class="container">
-    <h3>Your Wallet (Demo)</h3>
-    <p style="color:var(--muted); margin-bottom:12px">Local demo wallet using browser storage. You can Issue (mint demo), Transfer (local), Redeem or Burn — no real money.</p>
-
-    <div style="display:grid; grid-template-columns:1fr 420px; gap:18px">
-      <div class="wallet reveal" id="walletCard">
-        <div class="meta">Wallet Address</div>
-        <div id="addr" style="font-family:monospace; font-size:13px; color:var(--muted); margin-bottom:8px">—</div>
-
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div>
-            <div class="bal" id="bal">0 SC</div>
-            <div style="color:var(--muted);font-size:13px">≈ <span id="fiat">₹0.00</span></div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:12px;color:var(--muted)">Notes owned</div>
-            <div id="noteCount" style="font-weight:800">0</div>
-          </div>
-        </div>
-
-        <div style="margin-top:12px" class="wallet-actions">
-          <button class="btn" id="openSend">Transfer</button>
-          <button class="btn" id="openReceive">Receive (QR)</button>
-          <button class="btn" id="quickIssue">Top-up (Demo)</button>
-          <button class="btn" id="redeemBtn">Redeem Note</button>
-          <button class="btn" id="burnBtn">Burn</button>
-        </div>
-
-        <div style="margin-top:14px">
-          <div style="font-weight:800; margin-bottom:8px">Recent Activity</div>
-          <div class="history" id="history"></div>
-        </div>
-      </div>
-
-      <aside class="reveal">
-        <div style="padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); border:1px solid var(--border)">
-          <h4 style="margin:0 0 8px">Receive (QR)</h4>
-          <canvas id="qrCanvas" width="220" height="220" style="background:#fff;border-radius:10px;display:block;margin:0 auto 10px"></canvas>
-          <div style="display:flex;gap:8px;justify-content:center">
-            <button class="btn" id="copyAddr">Copy</button>
-            <button class="btn" id="shareBtn">Share</button>
-          </div>
-        </div>
-
-        <div style="margin-top:14px;padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); border:1px solid var(--border)">
-          <h4 style="margin:0 0 8px">Quick Actions</h4>
-          <div style="display:flex;gap:8px;flex-direction:column">
-            <label style="font-size:13px;color:var(--muted)">Issue amount (SC)</label>
-            <input id="topAmt" type="number" value="100" />
-            <button class="btn" id="doTop">Issue Demo</button>
-          </div>
-        </div>
-      </aside>
-    </div>
-  </div>
-</section>
-
-<!-- STORY / TIMELINE -->
-<section id="story" class="section">
-  <div class="container">
-    <h3>Shaheed Bhagat Singh — Timeline & Tribute</h3>
-    <div class="story-card reveal" style="margin-top:12px">
-      <div>
-        <div class="timeline">
-          <div style="background:var(--paper); color:#071126; padding:14px; border-radius:12px; border:1px solid rgba(7,20,34,.06)">
-            <strong>1907</strong> — Birth in Banga, Punjab. Early life and education.
-          </div>
-          <div style="background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); padding:14px; border-radius:12px; border:1px solid var(--border)">
-            <strong>1920s</strong> — Became active in the struggle for independence. Influenced youth with radical ideas.
-          </div>
-          <div style="background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); padding:14px; border-radius:12px; border:1px solid var(--border)">
-            <strong>1931</strong> — Martyrdom. His sacrifice remains a symbol of courage and conviction.
-          </div>
-          <div style="background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); padding:14px; border-radius:12px; border:1px solid var(--border)">
-            <strong>Legacy</strong> — "Inquilab Zindabad" — his ideas inspire generations.
-          </div>
-        </div>
-      </div>
-
-      <aside class="story-portrait">
-        <!-- stylized portrait SVG (respectful, abstract) -->
-        <svg viewBox="0 0 420 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shaheed portrait">
-          <defs>
-            <linearGradient id="bgGrad" x1="0" x2="1">
-              <stop offset="0" stop-color="#fff7dd" />
-              <stop offset="1" stop-color="#ffd36e" />
-            </linearGradient>
-            <linearGradient id="accent" x1="0" x2="1">
-              <stop offset="0" stop-color="#9ad3ff" />
-              <stop offset="1" stop-color="#ffb3e6" />
-            </linearGradient>
-          </defs>
-
-          <rect width="100%" height="100%" rx="18" fill="url(#bgGrad)"/>
-          <!-- face shape -->
-          <g transform="translate(40,40)">
-            <path d="M180 80 C220 80, 240 140, 210 170 C190 190, 140 190, 110 170 C90 155, 120 80, 180 80 Z" fill="#071126" opacity=".95"/>
-            <!-- turban -->
-            <path d="M80 60 C110 20, 270 22, 300 60 C260 42, 200 42, 120 60 Z" fill="#071126"/>
-            <!-- moustache -->
-            <path d="M125 165 C150 185, 210 185, 235 165" stroke="#ffd36e" stroke-width="8" stroke-linecap="round"/>
-            <!-- chin / neck -->
-            <path d="M140 200 C160 220, 200 220, 220 200" fill="#071126" opacity=".9"/>
-            <!-- small emblem -->
-            <circle cx="300" cy="420" r="36" fill="url(#accent)"/>
-            <text x="300" y="428" fill="#071126" font-family="Poppins" font-size="18" font-weight="800" text-anchor="middle">SC</text>
-          </g>
-        </svg>
-        <div style="margin-top:10px;color:var(--muted);font-size:13px">Stylized tribute portrait • vector</div>
-      </aside>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="container">
-    <div style="max-width:900px;margin:0 auto">
-      <div style="font-weight:800;color:var(--gold);font-family:Poppins">ShaheedCoin</div>
-      <div style="margin-top:8px;color:var(--muted)">&copy; <span id="yr"></span> Tribute Demo • Designed with respect to Shaheed Bhagat Singh. This is a demo and not legal tender.</div>
-    </div>
-  </div>
-</footer>
-
-<!-- MODALS / INTERACTIVITY - simple panels -->
-<div id="modals" aria-hidden="true" style="display:none"></div>
-
-<script>
-/* =========================
-   ShaheedCoin — Demo logic
-   - single-file, localStorage wallet
-   - features: issue, transfer (local), qr draw, history
-   ========================= */
-
-const TOKEN = {name:'ShaheedCoin', symbol:'SC', priceINR:15};
-
-const $ = (id)=>document.getElementById(id);
-const toast = (t)=>{ console.log(t); };
-
-function shortAddr(a){ return a.slice(0,8) + '…' + a.slice(-6); }
-function randHex(n=8){ let s='0x'; const chars='abcdef0123456789'; for(let i=0;i<n;i++) s+=chars[Math.random()*chars.length|0]; return s; }
-
-const storageKey='shaheed-demo-v1';
-function readState(){ return JSON.parse(localStorage.getItem(storageKey) || '{}'); }
-function writeState(s){ localStorage.setItem(storageKey, JSON.stringify(s)); }
-
-function ensure(){
-  let s=readState();
-  if(!s.addr){ s.addr = randHex(20); s.balance=250; s.notes=[{id:'NX-1',value:100,theme:'hero'}]; s.hist=[]; }
-  if(!s.serial) s.serial = 'NX-' + Date.now().toString().slice(-6);
-  writeState(s);
-}
-function renderWallet(){
-  const s=readState();
-  $('yr').textContent = new Date().getFullYear();
-  document.querySelectorAll('#addr').forEach(el=>el.textContent = s.addr);
-  document.querySelectorAll('#bal').forEach(el=>el.textContent = (s.balance||0) + ' ' + TOKEN.symbol);
-  document.querySelectorAll('#noteCount').forEach(el=>el.textContent = (s.notes? s.notes.length:0));
-  $('fiat').textContent = '₹' + ((s.balance||0)*TOKEN.priceINR).toLocaleString();
-  renderHistory();
-  drawQR();
-  renderStackPreview();
-}
-
-function addHist(action,delta,meta){
-  const s=readState(); s.hist = s.hist||[]; s.hist.push({action,delta,meta,time:Date.now()}); writeState(s);
-}
-
-function renderHistory(){
-  const s=readState(); const hist = s.hist||[]; const cont = document.getElementById('history'); cont.innerHTML='';
-  if(!hist.length){ cont.innerHTML = '<div style="color:var(--muted);padding:8px">No records yet.</div>'; return; }
-  hist.slice().reverse().forEach(tx=>{
-    const el = document.createElement('div'); el.className='tx';
-    const left = document.createElement('div'); left.innerHTML = `<div style="font-weight:800">${tx.action}</div><div style="color:var(--muted);font-size:13px">${tx.meta} • ${new Date(tx.time).toLocaleString()}</div>`;
-    const right = document.createElement('div'); right.innerHTML = `<div style="font-weight:800">${tx.delta>0?'+':''}${tx.delta} ${TOKEN.symbol}</div>`;
-    el.appendChild(left); el.appendChild(right); cont.appendChild(el);
-  });
-}
-
-function drawQR(){
-  const canvas = document.getElementById('qrCanvas'); const ctx = canvas.getContext('2d');
-  const s = readState();
-  const text = 'shaheed:' + s.addr;
-  // simple artistic QR-like block pattern (not fully scannable but visually fits)
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle='#ffffff';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle='#071126';
-  for(let i=0;i<text.length;i++){
-    const v = text.charCodeAt(i);
-    for(let b=0;b<6;b++){
-      if((v>>b)&1){
-        const X = (i*7 + b*5) % (canvas.width-8);
-        const Y = (i*11 + b*3) % (canvas.height-8);
-        ctx.fillRect(X, Y, 4 + (b%2), 4 + (b%2));
-      }
-    }
-  }
-}
-
-// basic actions
-document.getElementById('openSend').addEventListener('click', ()=>{
-  const to = prompt('Enter recipient address (demo):', randHex(10));
-  if(!to) return;
-  const amt = Number(prompt('Amount (SC):','50'));
-  if(!(amt>0)) return alert('Invalid amount');
-  const s=readState();
-  if(s.balance < amt) return alert('Insufficient balance');
-  s.balance -= amt; addHist('Transfer','-'+amt, 'To ' + shortAddr(to)); writeState(s); renderWallet(); alert('Sent (demo)');
-});
-
-document.getElementById('openReceive').addEventListener('click', ()=>{
-  // simply highlight address
-  const s=readState();
-  navigator.clipboard.writeText(s.addr).then(()=> alert('Address copied to clipboard'), ()=>alert('Copy failed'));
-});
-
-document.getElementById('quickIssue').addEventListener('click', ()=>{
-  const amt = Number(prompt('Issue (mint demo) amount:','100'));
-  if(!(amt>0)) return;
-  const s=readState(); s.balance = (s.balance||0) + amt;
-  s.notes = s.notes||[]; s.notes.push({id:'NX-'+Date.now().toString().slice(-4), value:amt, theme:'holo'});
-  addHist('Issue','+'+amt, 'Demo mint'); writeState(s); renderWallet(); alert('Issued (demo)');
-});
-
-document.getElementById('doTop').addEventListener('click', ()=>{
-  const val = Number(document.getElementById('topAmt').value||0);
-  if(!(val>0)) return alert('Enter >0');
-  const s=readState(); s.balance = (s.balance||0) + val; s.notes = s.notes||[]; s.notes.push({id:'NX-'+Date.now().toString().slice(-4), value:val, theme:'hero'}); addHist('Top-up','+'+val,'Quick'); writeState(s); renderWallet(); alert('Top-up done');
-});
-
-document.getElementById('redeemBtn').addEventListener('click', ()=>{
-  const s=readState(); if(!s.notes || s.notes.length===0) return alert('No notes to redeem');
-  const n = s.notes.pop(); s.balance = Math.max(0, s.balance - n.value); addHist('Redeem','-'+n.value, 'Redeemed '+n.id); writeState(s); renderWallet(); alert('Redeemed note');
-});
-
-document.getElementById('burnBtn').addEventListener('click', ()=>{
-  const s=readState(); const burn = Math.min( Math.ceil((s.balance||0)*0.1), s.balance||0 );
-  if(burn<=0) return alert('Nothing to burn');
-  s.balance -= burn; addHist('Burn','-'+burn,'Manual burn'); writeState(s); renderWallet(); alert('Burned '+burn+' SC');
-});
-
-document.getElementById('copyAddr').addEventListener('click', async ()=>{
-  const s=readState(); try{ await navigator.clipboard.writeText(s.addr); alert('Address copied'); }catch{ alert('Copy failed'); }
-});
-document.getElementById('shareBtn').addEventListener('click', async ()=>{
-  const s=readState(); const link = location.href + '#addr=' + encodeURIComponent(s.addr);
-  if(navigator.share){ navigator.share({title:'Receive ShaheedCoin', text:link}).catch(()=>navigator.clipboard.writeText(link).then(()=>alert('Link copied'))); }
-  else { navigator.clipboard.writeText(link).then(()=>alert('Link copied')); }
-});
-
-function renderStackPreview(){
-  // optional: visually show notes count (no heavy DOM)
-}
-
-// init
-ensure(); renderWallet();
-
-// reveal on scroll
-function reveal(){ document.querySelectorAll('.reveal').forEach(el=>{ const r=el.getBoundingClientRect(); if(r.top < window.innerHeight - 60) el.classList.add('visible'); }); }
-window.addEventListener('scroll', reveal); window.addEventListener('load', ()=>{ reveal(); drawQR(); });
-document.getElementById('gotoWallet').addEventListener('click', ()=>location.href='#wallet-section');
-
-// Issue modal open
-document.getElementById('openIssue').addEventListener('click', ()=>{ const amt = Number(prompt('Issue demo amount (SC):',100)); if(amt>0){ const s=readState(); s.balance=(s.balance||0)+amt; s.notes=s.notes||[]; s.notes.push({id:'NX-'+Date.now().toString().slice(-4), value:amt}); addHist('Issue','+'+amt,'Manual'); writeState(s); renderWallet(); alert('Issued demo ' + amt + ' SC'); } });
-
-</script>
+    
+    <!-- HD नोट्स -->
+    <div class="note" id="note10"></div>
+    <div class="note" id="note100"></div>
+    
+    <script>
+        // कॉइन फ्लिप
+        function flipCoin() {
+            const coin = document.getElementById('coin');
+            coin.style.transform = coin.style.transform === 'rotateY(180deg)' ? 'rotateY(0deg)' : 'rotateY(180deg)';
+        }
+        
+        // नोट फ्लिप (अगर चाहिए तो)
+        document.getElementById('note10').addEventListener('click', function() {
+            this.style.transform = this.style.transform === 'rotateY(180deg)' ? 'rotateY(0deg)' : 'rotateY(180deg)';
+        });
+    </script>
 </body>
 </html>
